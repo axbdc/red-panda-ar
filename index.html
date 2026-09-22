@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Panda Vermelho em AR</title>
+  <meta name="theme-color" content="#1a0f0a">
+
+  <!-- Google Model Viewer: preview 3D + AR (Scene Viewer no Android, Quick Look no iOS) -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #1a0f0a;
+      --card: #26170f;
+      --accent: #d9531e;
+      --accent-2: #f08a4b;
+      --text: #fbeee4;
+      --muted: #c9ab98;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: radial-gradient(120% 80% at 50% 0%, #3a1d10 0%, var(--bg) 60%);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+    }
+    header { text-align: center; padding: 24px 0 8px; }
+    h1 { margin: 0; font-size: 1.6rem; letter-spacing: .5px; }
+    header p { margin: 6px 0 0; color: var(--muted); font-size: .95rem; }
+
+    model-viewer {
+      width: 100%;
+      max-width: 520px;
+      height: 58vh;
+      min-height: 320px;
+      background: transparent;
+      --poster-color: transparent;
+      --progress-bar-color: var(--accent);
+    }
+
+    .ar-btn {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 16px 32px;
+      box-shadow: 0 8px 24px rgba(217, 83, 30, .45);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ar-btn:active { transform: scale(.97); }
+
+    /* Botão dentro do model-viewer (slot ar-button) */
+    model-viewer .ar-btn {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+    }
+    model-viewer .ar-btn:active { transform: translateX(-50%) scale(.97); }
+
+    .actions { margin: 16px 0; text-align: center; }
+    .hint { color: var(--muted); font-size: .85rem; max-width: 420px; text-align: center; line-height: 1.4; }
+    .hidden { display: none !important; }
+
+    #fallback {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-top: 12px;
+      max-width: 420px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Panda Vermelho</h1>
+    <p>Roda o modelo com o dedo e depois abre-o em realidade aumentada</p>
+  </header>
+
+  <!--
+    src     = GLB (Android / preview 3D)
+    ios-src = USDZ (iPhone / iPad via AR Quick Look)
+    Troca os nomes se os teus ficheiros tiverem outro nome.
+  -->
+  <model-viewer
+    id="viewer"
+    src="red_panda.glb"
+    ios-src="red_panda.usdz"
+    alt="Panda vermelho 3D"
+    ar
+    ar-modes="scene-viewer quick-look webxr"
+    ar-scale="auto"
+    camera-controls
+    touch-action="pan-y"
+    auto-rotate
+    autoplay
+    shadow-intensity="1"
+    environment-image="neutral"
+    exposure="1">
+    <button slot="ar-button" class="ar-btn">Ver em AR</button>
+  </model-viewer>
+
+  <!-- Fallback manual: aparece se o model-viewer disser que o AR não está disponível -->
+  <div id="fallback" class="hidden">
+    <div class="actions">
+      <a id="manual-ar" class="ar-btn" href="#">Ver em AR</a>
+    </div>
+    <p class="hint" id="fallback-text"></p>
+  </div>
+
+  <p class="hint" id="hint">Toca em "Ver em AR" e aponta a câmara para o chão.</p>
+
+  <script>
+    // Ficheiros (caminhos absolutos a partir da página, necessário para o Scene Viewer)
+    const GLB  = new URL("red_panda.glb",  location.href).href;
+    const USDZ = new URL("red_panda.usdz", location.href).href;
+
+    const ua = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(ua);
+
+    // Mesmo intent do projeto ar-models (Scene Viewer do Google)
+    function sceneViewerIntent(glbUrl) {
+      return "intent://arvr.google.com/scene-viewer/1.0?file=" + encodeURIComponent(glbUrl) +
+             "&mode=ar_preferred&title=" + encodeURIComponent("Panda Vermelho") +
+             "#Intent;scheme=https;package=com.google.android.googlequicksearchbox;" +
+             "action=android.intent.action.VIEW;" +
+             "S.browser_fallback_url=" + encodeURIComponent(location.href) + ";end;";
+    }
+
+    function openAR() {
+      if (isIOS) {
+        // Quick Look precisa de um <a rel="ar"> com um <img> lá dentro
+        const a = document.createElement("a");
+        a.rel = "ar";
+        a.href = USDZ;
+        a.appendChild(document.createElement("img"));
+        document.body.appendChild(a);
+        a.click();
+      } else if (isAndroid) {
+        location.href = sceneViewerIntent(GLB);
+      }
+    }
+
+    const viewer = document.getElementById("viewer");
+    const fallback = document.getElementById("fallback");
+    const fallbackText = document.getElementById("fallback-text");
+    const hint = document.getElementById("hint");
+    document.getElementById("manual-ar").addEventListener("click", e => { e.preventDefault(); openAR(); });
+
+    function showFallback() {
+      hint.classList.add("hidden");
+      fallback.classList.remove("hidden");
+      if (isIOS || isAndroid) {
+        fallbackText.textContent = "Se o botão acima não abrir a câmara, usa este.";
+      } else {
+        document.getElementById("manual-ar").parentElement.classList.add("hidden");
+        fallbackText.textContent = "A realidade aumentada só funciona no telemóvel. Lê o QR code com a câmara do iPhone ou Android.";
+      }
+    }
+
+    // Se o model-viewer não conseguir AR, mostra o botão manual (iOS/Android) ou a mensagem (desktop)
+    viewer.addEventListener("load", () => {
+      if (!viewer.canActivateAR) showFallback();
+    });
+
+    // Se falhar ao entrar em AR
+    viewer.addEventListener("ar-status", e => {
+      if (e.detail.status === "failed") showFallback();
+    });
+
+    // Se o script do model-viewer nem carregar (rede má), ao fim de 6s mostra o fallback
+    setTimeout(() => {
+      if (!customElements.get("model-viewer")) showFallback();
+    }, 6000);
+  </script>
+</body>
+</html>
