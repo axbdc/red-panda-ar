@@ -223,6 +223,11 @@
       box-shadow: 0 3px 0 var(--line); display: grid; place-items: center; padding: 0;
     }
     .sound-btn svg { width: 24px; height: 24px; }
+    .sound-btn.pulse { animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 3px 0 var(--line), 0 0 0 0 rgba(232, 98, 42, .45); }
+      50% { box-shadow: 0 3px 0 var(--line), 0 0 0 10px rgba(232, 98, 42, 0); }
+    }
     #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
   </style>
 </head>
@@ -467,7 +472,7 @@ function noise(t, dur, { vol = .05, freq = 4000, type = "highpass", q = .7, swee
 }
 function play(fn) {
   if (!audioInit() || muted) return;
-  if (actx.state !== "running") actx.resume();
+  if (actx.state !== "running") actx.resume().catch(() => {});
   fn(actx.currentTime + .01);
 }
 
@@ -566,26 +571,47 @@ function musicDuck(screenId) {
   musicBus.gain.setTargetAtTime(v, actx.currentTime, .3);
 }
 
-// A música arranca no primeiro toque (os browsers não deixam tocar som antes disso)
-function firstTouch() {
-  document.removeEventListener("pointerdown", firstTouch, true);
-  if (!audioInit()) return;
-  actx.resume();
-  musicStart();
-  musicDuck(current);
-}
-document.addEventListener("pointerdown", firstTouch, true);
+// iPhone: deixa tocar mesmo com o botão de silêncio ligado (Safari 16.4+)
+try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
 
-// Pausa o som quando a página fica escondida (ex.: ao abrir a câmara de AR)
+// Os browsers só deixam tocar som depois de um toque completo (levantar o dedo ou clicar).
+// Tenta desbloquear em cada toque até o som estar mesmo a funcionar.
+const UNLOCK_EVENTS = ["pointerup", "touchend", "click", "keydown"];
+function audioReady() {
+  UNLOCK_EVENTS.forEach(ev => document.removeEventListener(ev, unlockAudio, true));
+  renderSoundBtn();
+}
+function unlockAudio() {
+  if (!audioInit()) return;
+  if (actx.state !== "running") {
+    actx.resume().catch(() => {});
+    // truque para iOS: tocar um som vazio dentro do gesto
+    const b = actx.createBufferSource();
+    b.buffer = actx.createBuffer(1, 1, 22050);
+    b.connect(actx.destination); b.start(0);
+  }
+  if (!muted) { musicStart(); musicDuck(current); }
+  if (actx.state === "running") audioReady();
+  else actx.onstatechange = () => { if (actx.state === "running") audioReady(); };
+}
+UNLOCK_EVENTS.forEach(ev => document.addEventListener(ev, unlockAudio, true));
+
+// Pausa o som quando a página fica escondida (ex.: ao abrir a câmara de AR) e retoma ao voltar
 document.addEventListener("visibilitychange", () => {
   if (!actx) return;
-  document.hidden ? actx.suspend() : actx.resume();
+  if (document.hidden) actx.suspend(); else actx.resume().catch(() => {});
 });
 
 // Botão de som
 const SPK_ON = `<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#e8622a"/><path d="M16 8.5c1.3 1 2 2.2 2 3.5s-.7 2.5-2 3.5M18.5 6c2 1.6 3 3.6 3 6s-1 4.4-3 6" fill="none" stroke="#e8622a" stroke-width="2" stroke-linecap="round"/></svg>`;
 const SPK_OFF = `<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#b9a595"/><path d="M17 9l5 6M22 9l-5 6" stroke="#b9a595" stroke-width="2" stroke-linecap="round"/></svg>`;
-function renderSoundBtn() { $("#sound-btn").innerHTML = muted ? SPK_OFF : SPK_ON; $("#sound-btn").setAttribute("aria-label", muted ? "Ligar o som" : "Desligar o som"); }
+function renderSoundBtn() {
+  const btn = $("#sound-btn");
+  btn.innerHTML = muted ? SPK_OFF : SPK_ON;
+  btn.setAttribute("aria-label", muted ? "Ligar o som" : "Desligar o som");
+  // a pulsar enquanto o som ainda não arrancou
+  btn.classList.toggle("pulse", !muted && (!actx || actx.state !== "running"));
+}
 $("#sound-btn").addEventListener("click", e => {
   e.stopPropagation();
   muted = !muted;
