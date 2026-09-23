@@ -68,7 +68,7 @@
     }
     .topbar h2 { margin: 0; flex: 1; text-align: center; font-size: 1.3rem; line-height: 1.1; padding-right: 86px; }
 
-    /* Avatar do Rubi (recorte da cara da ilustração) */
+    /* Avatar do Ravi (recorte da cara da ilustração) */
     .avatar {
       width: 60px; height: 60px; flex: none; border-radius: 50%;
       background: #fff url("image.png") no-repeat 50% 34% / 290%;
@@ -217,12 +217,19 @@
     .modal-box .row { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 8px; }
     @keyframes pop { from { transform: scale(.6); opacity: 0; } }
 
+    .sound-btn {
+      position: fixed; z-index: 45; top: calc(env(safe-area-inset-top) + 12px); right: 12px;
+      width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--card); cursor: pointer;
+      box-shadow: 0 3px 0 var(--line); display: grid; place-items: center; padding: 0;
+    }
+    .sound-btn svg { width: 24px; height: 24px; }
     #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 60; }
   </style>
 </head>
 <body>
 
 <canvas id="confetti"></canvas>
+<button id="sound-btn" class="sound-btn" aria-label="Som"></button>
 
 <!-- ================= INTRO ================= -->
 <section id="intro" class="screen active">
@@ -233,10 +240,10 @@
     <p class="kicker">Bem-vindos à</p>
     <h1>Festa de Anos <span>da Leonor</span></h1>
     <div class="hero">
-      <img src="image.png" alt="Rubi, o panda-vermelho, a dançar">
+      <img src="image.png" alt="Ravi, o panda-vermelho, a dançar">
       <div class="age-badge"><div><b id="age-num">8</b><small>anos</small></div></div>
     </div>
-    <p class="lead">O Rubi é um panda-vermelho e trouxe jogos para a festa. Quando quiseres, podes vê-lo aparecer na tua sala!</p>
+    <p class="lead">O Ravi é um panda-vermelho e trouxe jogos para a festa. Quando quiseres, podes vê-lo aparecer na tua sala!</p>
     <button class="btn" id="start">Vamos brincar!</button>
   </div>
 </section>
@@ -256,13 +263,13 @@
       <div class="done" data-done></div>
       <div class="ico" style="background:#e9f5df" data-ico="sopa"></div>
       <b>Sopa de Letras</b>
-      <span>Descobre as palavras que o Rubi escondeu</span>
+      <span>Descobre as palavras que o Ravi escondeu</span>
     </button>
     <button class="game-card" data-game="memoria">
       <div class="done" data-done></div>
       <div class="ico" style="background:#ffe9ef" data-ico="memoria"></div>
       <b>Jogo da Memória</b>
-      <span>Os pares das coisas que o Rubi adora</span>
+      <span>Os pares das coisas que o Ravi adora</span>
     </button>
     <button class="game-card wide" data-game="palavra">
       <div class="done" data-done></div>
@@ -273,7 +280,7 @@
 
   <button class="panda-card" id="panda-card">
     <div class="avatar"></div>
-    <div><b>Ver o Rubi em 3D</b><span>Põe o panda-vermelho na tua sala com a câmara!</span></div>
+    <div><b>Ver o Ravi em 3D</b><span>Põe o panda-vermelho na tua sala com a câmara!</span></div>
   </button>
 </section>
 
@@ -308,7 +315,7 @@
 
 <!-- ================= PANDA 3D ================= -->
 <section id="panda" class="screen">
-  <div class="topbar"><button class="back" data-back>Voltar</button><h2>O Rubi em 3D</h2></div>
+  <div class="topbar"><button class="back" data-back>Voltar</button><h2>O Ravi em 3D</h2></div>
   <div class="rubi-says"><div class="avatar"></div><div class="bubble">Roda-me com o dedo! Depois carrega em "Ver em AR" e aponta a câmara para o chão.</div></div>
   <div id="mv-slot" style="width:100%"></div>
   <div id="ar-fallback" class="hidden" style="margin-top:16px;text-align:center">
@@ -353,7 +360,7 @@ const CONFIG = {
    DESENHOS (SVG)
    ========================================================= */
 const ART = {
-  rubiImg: `<img src="image.png" alt="Rubi">`,
+  rubiImg: `<img src="image.png" alt="Ravi">`,
 
   paw: (fill = "#e8622a") => `<svg viewBox="0 0 48 48"><g fill="${fill}"><path d="M24 22c7 0 13 8 13 14 0 5-5 7-13 7s-13-2-13-7c0-6 6-14 13-14z"/><ellipse cx="10" cy="20" rx="4.5" ry="6" transform="rotate(-25 10 20)"/><ellipse cx="18.5" cy="11" rx="4.5" ry="6.5" transform="rotate(-8 18.5 11)"/><ellipse cx="29.5" cy="11" rx="4.5" ry="6.5" transform="rotate(8 29.5 11)"/><ellipse cx="38" cy="20" rx="4.5" ry="6" transform="rotate(25 38 20)"/></g><path d="M24 28c4 0 8 5 8 8 0 3-3 4-8 4s-8-1-8-4c0-3 4-8 8-8z" fill="#ffb3c4"/></svg>`,
 
@@ -368,7 +375,7 @@ const ART = {
   icoMem: `<svg viewBox="0 0 48 48"><rect x="4" y="8" width="22" height="30" rx="4" fill="#e8622a" transform="rotate(-10 15 23)"/><rect x="22" y="10" width="22" height="30" rx="4" fill="#fff" stroke="#ff6f91" stroke-width="3" transform="rotate(8 33 25)"/><path d="M33 18 C38 23 38 30 33 36 C28 30 28 23 33 18Z" fill="#6f9a4a" transform="rotate(8 33 25)"/></svg>`,
   icoZoo: `<svg viewBox="0 0 48 48"><circle cx="24" cy="26" r="17" fill="#ffc93c"/><path d="M11 16 L8 5 L19 12Z M37 16 L40 5 L29 12Z" fill="#e8622a"/><circle cx="18" cy="24" r="2.6" fill="#3a1f14"/><circle cx="30" cy="24" r="2.6" fill="#3a1f14"/><ellipse cx="24" cy="31" rx="3.5" ry="2.5" fill="#3a1f14"/><path d="M20 35 Q24 38 28 35" fill="none" stroke="#3a1f14" stroke-width="2" stroke-linecap="round"/><circle cx="40" cy="40" r="7" fill="#6f9a4a"/><text x="40" y="44" text-anchor="middle" font-family="Arial" font-weight="800" font-size="11" fill="#fff">?</text></svg>`,
 
-  // Cartas da memória: coisas de que o Rubi gosta
+  // Cartas da memória: coisas de que o Ravi gosta
   bamboo: `<svg viewBox="0 0 64 64"><rect x="24" y="4" width="11" height="56" rx="5" fill="#8db35f"/><path d="M24 22h11M24 42h11" stroke="#5f8a3c" stroke-width="3"/><path d="M35 20 C44 12 54 12 60 16 C52 22 44 23 35 20Z" fill="#6f9a4a"/><path d="M24 36 C16 28 8 28 3 32 C9 38 16 39 24 36Z" fill="#6f9a4a"/></svg>`,
   flower: `<svg viewBox="0 0 64 64"><g fill="#ff8fab"><circle cx="32" cy="16" r="11"/><circle cx="47" cy="27" r="11"/><circle cx="41" cy="45" r="11"/><circle cx="23" cy="45" r="11"/><circle cx="17" cy="27" r="11"/></g><circle cx="32" cy="32" r="8" fill="#ffc93c"/></svg>`,
   acorn: `<svg viewBox="0 0 64 64"><path d="M16 28 C16 46 24 58 32 60 C40 58 48 46 48 28Z" fill="#d9975a"/><path d="M12 28 C12 16 20 12 32 12 C44 12 52 16 52 28Z" fill="#8a5a30"/><path d="M32 12 C32 8 34 5 38 4" fill="none" stroke="#8a5a30" stroke-width="3" stroke-linecap="round"/><ellipse cx="25" cy="38" rx="3" ry="6" fill="#fff" opacity=".35"/></svg>`,
@@ -399,33 +406,198 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const semAcentos = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
+let current = "intro";
 function show(id) {
+  current = id;
   $$(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+  if (typeof musicDuck === "function") musicDuck(id);
   window.scrollTo(0, 0);
   if (id === "hub") renderHub();
 }
 
-// Sons simples, sem ficheiros
-let actx;
-function tone(freq = 660, dur = .12, type = "sine", vol = .15, delay = 0) {
-  try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    const t = actx.currentTime + delay;
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = type; o.frequency.value = freq;
-    g.gain.setValueAtTime(vol, t);
-    g.gain.exponentialRampToValueAtTime(.001, t + dur);
-    o.connect(g).connect(actx.destination);
-    o.start(t); o.stop(t + dur);
-  } catch (e) {}
+/* =========================================================
+   SOM — efeitos e música de fundo (tudo gerado no browser, sem ficheiros)
+   ========================================================= */
+const VOLUME = 2.2;   // volume geral (música + efeitos)
+let actx = null, master, musicBus, sfxBus, noiseBuf;
+let muted = false;
+try { muted = localStorage.getItem("festa-som") === "off"; } catch (e) {}
+
+function audioInit() {
+  if (actx) return actx;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  actx = new AC();
+  master = actx.createGain(); master.gain.value = muted ? 0 : VOLUME; master.connect(actx.destination);
+  musicBus = actx.createGain(); musicBus.gain.value = .55; musicBus.connect(master);
+  sfxBus = actx.createGain(); sfxBus.gain.value = .9; sfxBus.connect(master);
+  noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  return actx;
 }
+const N = m => 440 * Math.pow(2, (m - 69) / 12);   // nota MIDI -> Hz
+
+// Uma nota curta (tipo marimba / sininho)
+function note(freq, t, dur, { type = "triangle", vol = .1, bus = sfxBus, attack = .006, glide = 0 } = {}) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  g.gain.value = 0;
+  o.type = type;
+  o.frequency.setValueAtTime(freq, t);
+  if (glide) o.frequency.exponentialRampToValueAtTime(glide, t + dur);
+  g.gain.setValueAtTime(.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + attack);
+  g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g).connect(bus);
+  o.start(t); o.stop(t + dur + .03);
+}
+// Ruído filtrado (papelinhos, virar carta, chocalho)
+function noise(t, dur, { vol = .05, freq = 4000, type = "highpass", q = .7, sweep = 0, bus = sfxBus } = {}) {
+  const s = actx.createBufferSource(); s.buffer = noiseBuf;
+  const f = actx.createBiquadFilter(); f.type = type; f.Q.value = q;
+  f.frequency.setValueAtTime(freq, t);
+  if (sweep) f.frequency.exponentialRampToValueAtTime(sweep, t + dur);
+  const g = actx.createGain();
+  g.gain.value = 0;
+  g.gain.setValueAtTime(.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + .004);
+  g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  s.connect(f).connect(g).connect(bus);
+  s.start(t, Math.random() * .5); s.stop(t + dur + .03);
+}
+function play(fn) {
+  if (!audioInit() || muted) return;
+  if (actx.state !== "running") actx.resume();
+  fn(actx.currentTime + .01);
+}
+
 const sfx = {
-  ok: () => { tone(660, .1); tone(880, .15, "sine", .15, .1); },
-  bad: () => tone(200, .18, "triangle", .12),
-  flip: () => tone(520, .05, "square", .05),
-  leaf: () => { tone(380, .12, "sine", .1); tone(290, .16, "sine", .08, .1); },
-  win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .2, "triangle", .15, i * .12))
+  // toque num botão
+  tap: () => play(t => note(N(79), t, .09, { type: "sine", vol: .06 })),
+  // primeira letra escolhida na sopa de letras
+  select: () => play(t => note(N(76), t, .1, { type: "sine", vol: .07 })),
+  // virar carta: "fwip" + estalido
+  flip: () => play(t => {
+    noise(t, .13, { vol: .06, freq: 900, type: "bandpass", sweep: 3800, q: 1.2 });
+    note(N(84), t + .04, .08, { type: "sine", vol: .04 });
+  }),
+  // letra certa: sininho
+  ding: () => play(t => {
+    note(N(84), t, .4, { type: "sine", vol: .1 });
+    note(N(91), t + .03, .3, { type: "sine", vol: .04 });
+  }),
+  // acertou (palavra ou par): pum de festa + arpejo + brilhos
+  ok: () => play(t => {
+    noise(t, .2, { vol: .13, freq: 1800, type: "bandpass", sweep: 500, q: .8 });
+    [72, 76, 79, 84].forEach((m, i) => note(N(m), t + .05 + i * .07, .32, { vol: .09 }));
+    [96, 100, 103].forEach((m, i) => note(N(m), t + .34 + i * .05, .25, { type: "sine", vol: .03 }));
+  }),
+  // errou: "bu-bum" suave, a descer
+  bad: () => play(t => {
+    note(N(64), t, .17, { type: "sine", vol: .07, glide: N(62) });
+    note(N(60), t + .15, .24, { type: "sine", vol: .06, glide: N(57) });
+  }),
+  // ganhou o jogo: dois pums, fanfarra e brilhos
+  win: () => play(t => {
+    noise(t, .26, { vol: .15, freq: 2000, type: "bandpass", sweep: 500, q: .7 });
+    noise(t + .13, .26, { vol: .11, freq: 2500, type: "bandpass", sweep: 700, q: .7 });
+    [[72, 0], [76, .12], [79, .24], [84, .36], [79, .52], [84, .64]]
+      .forEach(([m, dt], i) => note(N(m), t + .1 + dt, i === 5 ? .8 : .22, { vol: .1 }));
+    [60, 64, 67].forEach(m => note(N(m), t + .74, .9, { type: "sine", vol: .05 }));
+    for (let i = 0; i < 6; i++) note(N(96 + (i % 3) * 4), t + .82 + i * .06, .22, { type: "sine", vol: .025 });
+  })
 };
+
+// ---------- Música de fundo: melodia alegre em loop (Dó maior, 8 compassos) ----------
+const BPM = 108, BEAT = 60 / BPM, BAR = BEAT * 4;
+const MELODY = [ // [nota, tempos]
+  [76,.5],[79,.5],[84,1],[79,.5],[76,.5],[79,1],
+  [81,.5],[79,.5],[76,1],[72,1],[76,1],
+  [77,.5],[81,.5],[84,1],[81,.5],[77,.5],[81,1],
+  [79,1],[83,.5],[81,.5],[79,2],
+  [76,.5],[79,.5],[84,1],[86,.5],[84,.5],[79,1],
+  [81,.5],[84,.5],[81,1],[76,2],
+  [77,.5],[76,.5],[74,.5],[77,.5],[81,1],[79,1],
+  [74,.5],[76,.5],[77,.5],[74,.5],[72,2]
+];
+const CHORDS = [[48, [60, 64, 67]], [45, [57, 60, 64]], [41, [57, 60, 65]], [43, [55, 59, 62]]]; // Dó, Lá m, Fá, Sol
+const music = { on: false, timer: null, bus: null };
+
+function scheduleLoop(start, bus) {
+  let t = start;
+  MELODY.forEach(([m, b]) => {
+    note(N(m), t, Math.min(b * BEAT * 1.5, .55), { vol: .05, bus });
+    note(N(m + 12), t, .22, { type: "sine", vol: .012, bus });
+    t += b * BEAT;
+  });
+  for (let bar = 0; bar < 8; bar++) {
+    const [bass, triad] = CHORDS[bar % 4], b0 = start + bar * BAR;
+    [0, 2].forEach(k => note(N(bass), b0 + k * BEAT, BEAT * .9, { type: "sine", vol: .07, attack: .012, bus }));
+    [1, 3].forEach(k => triad.forEach(m => note(N(m), b0 + k * BEAT, BEAT * .5, { type: "sine", vol: .018, bus })));
+    for (let e = 0; e < 8; e++) noise(b0 + e * BEAT / 2, .04, { vol: e % 2 ? .012 : .006, freq: 7000, bus });
+  }
+}
+function musicStart() {
+  if (!audioInit() || music.on || muted) return;
+  music.on = true;
+  music.bus = actx.createGain();
+  music.bus.connect(musicBus);
+  let start = actx.currentTime + .15;
+  const loop = () => {
+    if (!music.on) return;
+    scheduleLoop(start, music.bus);
+    start += BAR * 8;
+    music.timer = setTimeout(loop, Math.max(0, (start - actx.currentTime - 1.5) * 1000));
+  };
+  loop();
+}
+function musicStop() {
+  if (!music.on) return;
+  music.on = false;
+  clearTimeout(music.timer);
+  const b = music.bus;
+  b.gain.setTargetAtTime(0, actx.currentTime, .12);
+  setTimeout(() => b.disconnect(), 800);
+}
+// Mais baixinho durante os jogos
+function musicDuck(screenId) {
+  if (!actx) return;
+  const v = screenId.startsWith("g-") ? .28 : screenId === "panda" ? .35 : .55;
+  musicBus.gain.setTargetAtTime(v, actx.currentTime, .3);
+}
+
+// A música arranca no primeiro toque (os browsers não deixam tocar som antes disso)
+function firstTouch() {
+  document.removeEventListener("pointerdown", firstTouch, true);
+  if (!audioInit()) return;
+  actx.resume();
+  musicStart();
+  musicDuck(current);
+}
+document.addEventListener("pointerdown", firstTouch, true);
+
+// Pausa o som quando a página fica escondida (ex.: ao abrir a câmara de AR)
+document.addEventListener("visibilitychange", () => {
+  if (!actx) return;
+  document.hidden ? actx.suspend() : actx.resume();
+});
+
+// Botão de som
+const SPK_ON = `<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#e8622a"/><path d="M16 8.5c1.3 1 2 2.2 2 3.5s-.7 2.5-2 3.5M18.5 6c2 1.6 3 3.6 3 6s-1 4.4-3 6" fill="none" stroke="#e8622a" stroke-width="2" stroke-linecap="round"/></svg>`;
+const SPK_OFF = `<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#b9a595"/><path d="M17 9l5 6M22 9l-5 6" stroke="#b9a595" stroke-width="2" stroke-linecap="round"/></svg>`;
+function renderSoundBtn() { $("#sound-btn").innerHTML = muted ? SPK_OFF : SPK_ON; $("#sound-btn").setAttribute("aria-label", muted ? "Ligar o som" : "Desligar o som"); }
+$("#sound-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  muted = !muted;
+  try { localStorage.setItem("festa-som", muted ? "off" : "on"); } catch (err) {}
+  if (audioInit()) {
+    actx.resume();
+    master.gain.setTargetAtTime(muted ? 0 : VOLUME, actx.currentTime, .05);
+    if (muted) musicStop(); else { musicStart(); musicDuck(current); sfx.tap(); }
+  }
+  renderSoundBtn();
+});
+renderSoundBtn();
 
 // Confetis: papelinhos, corações e folhas de bambu
 const cv = $("#confetti"), cx = cv.getContext("2d");
@@ -479,11 +651,11 @@ function winGame(game, title, text, fact) {
   const all = first && pawCount() === GAMES.length;
   modal({
     icon: all ? ART.rubiImg : ART.paw(),
-    title: all ? "És amiga do Rubi!" : title,
-    text: all ? `Ganhaste as ${GAMES.length} patinhas! Vamos ver o Rubi em 3D?` : (first ? text + " Ganhaste uma patinha!" : text),
+    title: all ? "És amiga do Ravi!" : title,
+    text: all ? `Ganhaste as ${GAMES.length} patinhas! Vamos ver o Ravi em 3D?` : (first ? text + " Ganhaste uma patinha!" : text),
     fact,
     actions: all
-      ? [["Ver o Rubi", () => openPanda()], ["Voltar aos jogos", () => show("hub"), "link"]]
+      ? [["Ver o Ravi", () => openPanda()], ["Voltar aos jogos", () => show("hub"), "link"]]
       : [["Voltar aos jogos", () => show("hub")], ["Jogar outra vez", () => startGame(game), "link"]]
   });
 }
@@ -500,7 +672,7 @@ function modal({ icon, title, text, fact, actions }) {
     const b = document.createElement("button");
     b.className = style === "link" ? "link" : "btn small";
     b.textContent = label;
-    b.onclick = () => { $("#modal").classList.remove("show"); fn(); };
+    b.onclick = () => { sfx.tap(); $("#modal").classList.remove("show"); fn(); };
     box.appendChild(b);
   });
   $("#modal").classList.add("show");
@@ -533,10 +705,10 @@ $('[data-ico="palavra"]').innerHTML = ART.icoZoo;
   }
 })();
 
-$("#start").onclick = () => { tone(1, .01, "sine", .001); confetti(90); show("hub"); };
-$$(".game-card").forEach(c => c.onclick = () => startGame(c.dataset.game));
-$("#panda-card").onclick = openPanda;
-$$("[data-back]").forEach(b => b.onclick = () => show("hub"));
+$("#start").onclick = () => { audioInit(); musicStart(); sfx.ok(); confetti(90); show("hub"); };
+$$(".game-card").forEach(c => c.onclick = () => { sfx.tap(); startGame(c.dataset.game); });
+$("#panda-card").onclick = () => { sfx.tap(); openPanda(); };
+$$("[data-back]").forEach(b => b.onclick = () => { sfx.tap(); show("hub"); });
 
 function renderHub() {
   const n = pawCount();
@@ -545,7 +717,7 @@ function renderHub() {
     return ART.paw(on ? "#e8622a" : "#f0dccb").replace("<svg", `<svg class="${on ? "on" : ""}"`);
   }).join("");
   const msgs = [
-    `Olá! Eu sou o Rubi. Joga comigo e ganha as minhas ${GAMES.length} patinhas!`,
+    `Olá! Eu sou o Ravi. Joga comigo e ganha as minhas ${GAMES.length} patinhas!`,
     "Boa! Já tens uma patinha. Faltam duas!",
     "Uau, duas patinhas! Só falta uma!",
     `Ganhaste as patinhas todas! Parabéns, ${CONFIG.nome}!`
@@ -647,7 +819,7 @@ $("#ws-grid").addEventListener("pointerdown", e => {
     return;
   }
   ws.start = i; ws.dragging = true; ws.last = i;
-  wsHighlight([i]);
+  wsHighlight([i]); sfx.select();
 });
 $("#ws-grid").addEventListener("pointermove", e => {
   if (!ws || !ws.dragging) return;
@@ -696,6 +868,7 @@ function memFlip(c) {
     if (mem.matched === MEM_CARDS.length) setTimeout(() => winGame("memoria", "Que memória!", `Conseguiste em ${mem.moves} jogadas.`, "o panda-vermelho come sobretudo bambu, mas também gosta de frutos e rebentos?"), 500);
   } else {
     mem.lock = true;
+    setTimeout(sfx.bad, 380);
     setTimeout(() => { a.classList.remove("flip"); b.classList.remove("flip"); mem.open = []; mem.lock = false; }, 850);
   }
 }
@@ -747,13 +920,13 @@ function pwGuess(b) {
   if (pw.over || b.disabled) return;
   const l = b.dataset.l; b.disabled = true; pw.guessed.add(l);
   if (pw.base.includes(l)) {
-    b.classList.add("ok"); sfx.ok(); pwRender();
+    b.classList.add("ok"); sfx.ding(); pwRender();
     if ([...pw.base].every(x => pw.guessed.has(x))) {
       pw.over = true;
       setTimeout(() => winGame("palavra", "Acertaste!", `Era ${artigo(pw.nome)} ${pw.nome.toLowerCase()}!`, pw.f), 450);
     }
   } else {
-    b.classList.add("no"); sfx.leaf();
+    b.classList.add("no"); sfx.bad();
     pw.lives--;
     $$("#pw-lives svg")[pw.lives].classList.add("gone");
     if (pw.lives === 0) {
@@ -782,7 +955,7 @@ const isAndroid = /Android/.test(ua);
 
 function sceneViewerIntent(glbUrl) {
   return "intent://arvr.google.com/scene-viewer/1.0?file=" + encodeURIComponent(glbUrl) +
-    "&mode=ar_preferred&title=" + encodeURIComponent("Rubi, o panda-vermelho") +
+    "&mode=ar_preferred&title=" + encodeURIComponent("Ravi, o panda-vermelho") +
     "#Intent;scheme=https;package=com.google.android.googlequicksearchbox;" +
     "action=android.intent.action.VIEW;" +
     "S.browser_fallback_url=" + encodeURIComponent(location.href) + ";end;";
@@ -811,7 +984,7 @@ function openPanda() {
   s.src = "https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js";
   document.head.appendChild(s);
   $("#mv-slot").innerHTML = `
-    <model-viewer id="viewer" src="${CONFIG.glb}" ios-src="${CONFIG.usdz}" alt="Rubi, o panda-vermelho em 3D"
+    <model-viewer id="viewer" src="${CONFIG.glb}" ios-src="${CONFIG.usdz}" alt="Ravi, o panda-vermelho em 3D"
       ar ar-modes="scene-viewer quick-look webxr" ar-scale="auto"
       camera-controls touch-action="pan-y" auto-rotate autoplay
       shadow-intensity="1" environment-image="neutral" exposure="1">
@@ -821,7 +994,7 @@ function openPanda() {
   const fb = () => {
     $("#ar-fallback").classList.remove("hidden");
     if (isIOS || isAndroid) {
-      $("#ar-fallback-text").textContent = "Se o botão no Rubi não abrir a câmara, usa este.";
+      $("#ar-fallback-text").textContent = "Se o botão no Ravi não abrir a câmara, usa este.";
     } else {
       $("#manual-ar").classList.add("hidden");
       $("#ar-fallback-text").textContent = "A realidade aumentada só funciona no telemóvel. Lê o QR code com a câmara do iPhone ou Android.";
