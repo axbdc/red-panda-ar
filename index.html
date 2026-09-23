@@ -223,6 +223,15 @@
       box-shadow: 0 3px 0 var(--line); display: grid; place-items: center; padding: 0;
     }
     .sound-btn svg { width: 24px; height: 24px; }
+    .gate {
+      position: fixed; inset: 0; z-index: 70; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; text-align: center; padding: 16px;
+      transition: opacity .45s;
+    }
+    .gate.hide { opacity: 0; pointer-events: none; }
+    .gate img { width: 210px; display: block; margin: 0 auto; mix-blend-mode: multiply; animation: wiggle 2.8s ease-in-out infinite; transform-origin: 50% 90%; }
+    .gate p { font-size: 1.9rem; font-weight: 800; color: var(--orange); margin: 4px 0 18px; line-height: 1.1; }
+    .gate small { display: block; margin-top: 16px; color: var(--muted); font-size: .95rem; }
     .sound-btn.pulse { animation: pulse 1.4s ease-in-out infinite; }
     @keyframes pulse {
       0%, 100% { box-shadow: 0 3px 0 var(--line), 0 0 0 0 rgba(232, 98, 42, .45); }
@@ -235,6 +244,16 @@
 
 <canvas id="confetti"></canvas>
 <button id="sound-btn" class="sound-btn" aria-label="Som"></button>
+
+<!-- Ecrã de entrada: o primeiro toque liga a música (os telemóveis não deixam tocar som sem um toque) -->
+<div id="gate" class="gate">
+  <div class="gate-box">
+    <img src="image.png" alt="Ravi, o panda-vermelho">
+    <p>A festa vai começar!</p>
+    <button class="btn" id="gate-btn">Entrar na festa</button>
+    <small>Liga o som do telemóvel</small>
+  </div>
+</div>
 
 <!-- ================= INTRO ================= -->
 <section id="intro" class="screen active">
@@ -614,6 +633,14 @@ function renderSoundBtn() {
 }
 $("#sound-btn").addEventListener("click", e => {
   e.stopPropagation();
+  // Se o som ainda não arrancou, este toque só serve para o ligar (não desliga)
+  if (!actx || actx.state !== "running" || !music.on && !muted) {
+    muted = false;
+    try { localStorage.setItem("festa-som", "on"); } catch (err) {}
+    if (audioInit()) master.gain.setTargetAtTime(VOLUME, actx.currentTime, .05);
+    unlockAudio(); sfx.tap(); renderSoundBtn();
+    return;
+  }
   muted = !muted;
   try { localStorage.setItem("festa-som", muted ? "off" : "on"); } catch (err) {}
   if (audioInit()) {
@@ -624,6 +651,15 @@ $("#sound-btn").addEventListener("click", e => {
   renderSoundBtn();
 });
 renderSoundBtn();
+
+// Entrar na festa: liga o som e mostra a página
+function enterParty() {
+  unlockAudio();
+  sfx.ok();
+  $("#gate").classList.add("hide");
+  setTimeout(() => $("#gate").remove(), 500);
+}
+$("#gate").addEventListener("click", enterParty, { once: true });
 
 // Confetis: papelinhos, corações e folhas de bambu
 const cv = $("#confetti"), cx = cv.getContext("2d");
