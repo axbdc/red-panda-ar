@@ -532,56 +532,44 @@ const sfx = {
   })
 };
 
-// ---------- Música de fundo: melodia alegre em loop (Dó maior, 8 compassos) ----------
-const BPM = 108, BEAT = 60 / BPM, BAR = BEAT * 4;
-const MELODY = [ // [nota, tempos]
-  [76,.5],[79,.5],[84,1],[79,.5],[76,.5],[79,1],
-  [81,.5],[79,.5],[76,1],[72,1],[76,1],
-  [77,.5],[81,.5],[84,1],[81,.5],[77,.5],[81,1],
-  [79,1],[83,.5],[81,.5],[79,2],
-  [76,.5],[79,.5],[84,1],[86,.5],[84,.5],[79,1],
-  [81,.5],[84,.5],[81,1],[76,2],
-  [77,.5],[76,.5],[74,.5],[77,.5],[81,1],[79,1],
-  [74,.5],[76,.5],[77,.5],[74,.5],[72,2]
-];
-const CHORDS = [[48, [60, 64, 67]], [45, [57, 60, 64]], [41, [57, 60, 65]], [43, [55, 59, 62]]]; // Dó, Lá m, Fá, Sol
-const music = { on: false, timer: null, bus: null };
-
-function scheduleLoop(start, bus) {
-  let t = start;
-  MELODY.forEach(([m, b]) => {
-    note(N(m), t, Math.min(b * BEAT * 1.5, .55), { vol: .05, bus });
-    note(N(m + 12), t, .22, { type: "sine", vol: .012, bus });
-    t += b * BEAT;
-  });
-  for (let bar = 0; bar < 8; bar++) {
-    const [bass, triad] = CHORDS[bar % 4], b0 = start + bar * BAR;
-    [0, 2].forEach(k => note(N(bass), b0 + k * BEAT, BEAT * .9, { type: "sine", vol: .07, attack: .012, bus }));
-    [1, 3].forEach(k => triad.forEach(m => note(N(m), b0 + k * BEAT, BEAT * .5, { type: "sine", vol: .018, bus })));
-    for (let e = 0; e < 8; e++) noise(b0 + e * BEAT / 2, .04, { vol: e % 2 ? .012 : .006, freq: 7000, bus });
-  }
+// ---------- Música de fundo: "Whistle Cheerful Cute" (HitsLab, Pixabay) em loop ----------
+// O ficheiro já vem cortado para repetir sem pausa: toca a introdução uma vez
+// e depois repete de LOOP_START até LOOP_END para sempre.
+const MUSIC_FILE = "musica.mp3", LOOP_START = 1.032, LOOP_END = 44.982, MUSIC_VOL = .3;
+const music = { on: false, bus: null, src: null };
+const musicData = fetch(MUSIC_FILE).then(r => r.arrayBuffer()).catch(() => null);   // começa a descarregar logo
+let musicBuf = null;
+function loadMusic() {
+  if (musicBuf) return Promise.resolve(musicBuf);
+  return musicData.then(a => a && new Promise((res, rej) => actx.decodeAudioData(a.slice(0), res, rej)))
+    .then(b => (musicBuf = b)).catch(() => null);
 }
 function musicStart() {
   if (!audioInit() || music.on || muted) return;
   music.on = true;
-  music.bus = actx.createGain();
-  music.bus.connect(musicBus);
-  let start = actx.currentTime + .15;
-  const loop = () => {
-    if (!music.on) return;
-    scheduleLoop(start, music.bus);
-    start += BAR * 8;
-    music.timer = setTimeout(loop, Math.max(0, (start - actx.currentTime - 1.5) * 1000));
-  };
-  loop();
+  const bus = music.bus = actx.createGain();
+  bus.gain.value = 0;
+  bus.connect(musicBus);
+  loadMusic().then(buf => {
+    if (!music.on || music.bus !== bus || !buf) return;
+    const src = actx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    src.loopStart = LOOP_START;
+    src.loopEnd = Math.min(LOOP_END, buf.duration);
+    src.connect(bus);
+    src.start();
+    bus.gain.setTargetAtTime(MUSIC_VOL, actx.currentTime, .4);   // entra suave
+    music.src = src;
+  });
 }
 function musicStop() {
   if (!music.on) return;
   music.on = false;
-  clearTimeout(music.timer);
-  const b = music.bus;
-  b.gain.setTargetAtTime(0, actx.currentTime, .12);
-  setTimeout(() => b.disconnect(), 800);
+  const bus = music.bus, src = music.src;
+  music.src = null;
+  bus.gain.setTargetAtTime(0, actx.currentTime, .12);
+  setTimeout(() => { try { src && src.stop(); } catch (e) {} bus.disconnect(); }, 800);
 }
 // Mais baixinho durante os jogos
 function musicDuck(screenId) {
